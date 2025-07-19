@@ -1,313 +1,288 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>특별조건 차량 재고 검색</title>
-<style>
-  :root {
-    --gap:.75rem; --border:#d0d7de; --accent:#0d6efd; --accent-bg:#e7f1ff; --danger:#c00000;
-    --radius:12px; --bg:#ffffff; --gray:#555; --shadow:0 2px 4px rgba(0,0,0,.08)
-  }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Helvetica,Arial,sans-serif; background:#f6f8fa; color:#222; }
-  header { padding:1.25rem 1rem .75rem; background:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:10; }
-  h1 { margin:0 0 .5rem; font-size:1.25rem; }
-  form.filters { display:grid; gap:var(--gap); grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); align-items:end; }
-  form.filters label { display:flex; flex-direction:column; font-size:.75rem; font-weight:600; gap:.35rem; letter-spacing:.5px; text-transform:uppercase; color:#333; }
-  select, input[type=number], input[type=text] {
-    appearance:none; border:1px solid var(--border); padding:.55rem .6rem; border-radius:var(--radius);
-    background:#fff; font-size:.85rem; box-shadow:0 1px 0 rgba(0,0,0,.02) inset;
-  }
-  select[multiple] { height:120px; }
-  button { cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:.6rem 1rem;
-    border-radius:var(--radius); font-weight:600; font-size:.85rem; letter-spacing:.5px;
-  }
-  button.secondary { background:#fff; color:var(--accent); }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  #count { margin:1rem 0 .5rem; font-weight:700; color:var(--danger); }
-  main { padding:1rem; }
-  table { width:100%; border-collapse:collapse; font-size:.78rem; background:#fff; }
-  thead th { position:sticky; top:0; background:#fff; box-shadow:0 1px 0 var(--border); z-index:5; }
-  th, td { padding:.5rem .55rem; border:1px solid #e5e7eb; text-align:left; vertical-align:top; }
-  tbody tr:nth-child(even) { background:#fafafa; }
-  .pillbox { display:flex; flex-wrap:wrap; gap:.4rem; margin:.4rem 0 0; }
-  .pill { background:var(--accent-bg); color:#014a9c; padding:.25rem .55rem; border-radius:999px; font-size:.65rem; display:inline-flex; align-items:center; gap:.35rem; }
-  .pill button { all:unset; cursor:pointer; font-weight:700; }
-  .toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.3rem; }
-  .summary { font-size:.7rem; color:var(--gray); }
-  #loading { padding:2rem; text-align:center; font-size:.9rem; }
-  .no-results { padding:1rem; text-align:center; font-size:.85rem; background:#fff; border:1px dashed var(--border); border-radius:var(--radius); }
-  footer { margin:2rem 0 3rem; text-align:center; font-size:.65rem; color:var(--gray); }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>특별조건 차량 재고 검색</title>
+  <style>
+    :root {
+      --gap:.75rem;--border:#d0d7de;--accent:#0d6efd;--accent-bg:#e7f1ff;--danger:#c00000;--radius:12px;--bg:#ffffff;--gray:#555;--shadow:0 2px 4px rgba(0,0,0,.08);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+    body {margin:0;padding:1.25rem;line-height:1.4;background:#f5f7fa;color:#222;}
+    h1{margin:.25rem 0 1rem;font-size:1.4rem;}
+    fieldset{border:1px solid var(--border);padding:var(--gap);border-radius:var(--radius);background:#fff;min-width:0;}
+    legend{padding:0 .5rem;font-weight:600;}
+    .filters{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:1rem;}
+    label{display:flex;flex-direction:column;font-size:.75rem;font-weight:600;gap:.35rem;color:#222;}
+    select, input[type=number], input[type=text]{padding:.45rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;background:#fff;}
+    select[multiple]{height:7.5rem;}
+    .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.25rem;}
+    .count{font-weight:700;color:var(--danger);margin-bottom:.5rem;}
+    table{width:100%;border-collapse:collapse;background:#fff;box-shadow:var(--shadow);} 
+    th,td{border:1px solid #e2e5e9;padding:.5rem .55rem;font-size:.72rem;vertical-align:top;word-break:keep-all;}
+    th{background:#f0f4f8;font-weight:600;position:sticky;top:0;z-index:3;}
+    tbody tr:nth-child(even){background:#fafcff;}
+    .toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.75rem;}
+    button{cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;padding:.5rem .85rem;border-radius:8px;font-size:.8rem;font-weight:600;display:inline-flex;align-items:center;gap:.4rem;}
+    button.outline{background:#fff;color:var(--accent);} 
+    .fade{opacity:.55;font-size:.65rem;font-weight:500;}
+    .no-data{padding:2rem;text-align:center;color:var(--gray);font-size:.85rem;}
+    .loading{animation:blink 1.2s infinite;}
+    @keyframes blink{50%{opacity:.3}}
+    .flex{display:flex;gap:.5rem;align-items:center;}
+    .grow{flex:1;}
+    .inline-note{font-size:.65rem;font-weight:400;color:#666;margin-top:-.25rem;}
+  </style>
 </head>
 <body>
-  <header>
-    <h1>특별조건 차량 재고 검색</h1>
-    <form id="filterForm" class="filters" autocomplete="off">
-      <label>차종
-        <select name="차종" id="차종">
-          <option value="">전체</option>
-        </select>
-      </label>
-      <label>트림 / 상세사양
-        <select name="트림" id="트림">
-          <option value="">전체</option>
-        </select>
-      </label>
-      <label>옵션
-        <select name="옵션" id="옵션">
-          <option value="">전체</option>
-        </select>
-      </label>
-      <label>외장색 (다중선택)
-        <select name="외장색" id="외장색" multiple></select>
-        <div id="extColorPills" class="pillbox"></div>
-      </label>
-      <label>내장색
-        <select name="내장색" id="내장색">
-          <option value="">전체</option>
-        </select>
-      </label>
-      <label>출고센터
-        <select name="출고센터" id="출고센터">
-          <option value="">전체</option>
-        </select>
-      </label>
-      <label>최대 판매가
-        <input type="number" id="maxPrice" placeholder=\"숫자만\" inputmode=\"numeric\" />
-      </label>
-      <div class=\"toolbar\">
-        <button type=\"submit\">검색</button>
-        <button type=\"button\" class=\"secondary\" id=\"resetBtn\">초기화</button>
+  <h1>특별조건 차량 재고 검색</h1>
+  <div class="toolbar">
+    <button id="resetBtn" type="button">필터 초기화</button>
+    <div id="loading" class="fade loading">데이터 불러오는 중...</div>
+  </div>
+  <form id="filterForm" autocomplete="off">
+    <fieldset>
+      <legend>검색 필터</legend>
+      <div class="filters">
+        <label>차종
+          <select id="차종" name="차종">
+            <option value="">(전체)</option>
+          </select>
+        </label>
+        <label>트림 / 상세사양
+          <select id="상세사양" name="상세사양">
+            <option value="">(전체)</option>
+          </select>
+        </label>
+        <label>외장색 (복수선택)
+          <select id="외장색" name="외장색" multiple></select>
+          <span class="inline-note">Ctrl/Command 또는 Shift로 다중 선택</span>
+        </label>
+        <label>내장색
+          <select id="내장색" name="내장색">
+            <option value="">(전체)</option>
+          </select>
+        </label>
+        <label>출고센터
+          <select id="출고센터" name="출고센터">
+            <option value="">(전체)</option>
+          </select>
+        </label>
+        <label>옵션
+          <select id="옵션" name="옵션">
+            <option value="">(전체)</option>
+          </select>
+        </label>
+        <label>판매가격 (최대)
+          <input id="판매가격_max" name="판매가격_max" type="number" placeholder="최대가격" min="0" step="10000" />
+        </label>
       </div>
-      <div class=\"summary\" id=\"summary\"></div>
-    </form>
-    <div id=\"count\">데이터 로딩 중...</div>
-  </header>
-  <main>
-    <div id=\"loading\">재고 데이터를 불러오는 중...</div>
-    <div style=\"overflow:auto; max-height:70vh; border:1px solid var(--border); border-radius:var(--radius);\">
-      <table id=\"resultTable\" style=\"display:none;\">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>차종</th>
-            <th>차량상태</th>
-            <th>트림 / 상세사양</th>
+    </fieldset>
+  </form>
+  <p id="resultCount" class="count" hidden></p>
+  <div class="table-wrapper">
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>차종</th>
+          <th>차량상태</th>
+          <th>상세사양</th>
             <th>옵션</th>
-            <th>외장색</th>
-            <th>내장색</th>
-            <th>생산번호</th>
-            <th>출고센터</th>
-            <th>생산일</th>
-            <th>판매코드(통합)</th>
-            <th>판매가</th>
-            <th>조건 계</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id=\"noResults\" class=\"no-results\" style=\"display:none;\">조건에 맞는 재고가 없습니다.</div>
-  </main>
-  <footer>
-    © <span id=\"year\"></span> 재고 검색. (GitHub Pages용)
-  </footer>
+          <th>외장색</th>
+          <th>내장색</th>
+          <th>생산번호</th>
+          <th>출고센터</th>
+          <th>생산일</th>
+          <th>판매코드</th>
+          <th>판매가</th>
+          <th>조건 계</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="noData" class="no-data" hidden>검색 결과가 없습니다.</div>
 
-<script>
-const DATA_URL = 'inventory.json';
-let rawData = [];
-let filtered = [];
+  <script>
+    // ==== 설정 부분 (필요시 경로 수정) ====
+    const DATA_URL = 'data/inventory.json'; // 같은 리포 내 data 폴더에 JSON 업로드 가정
+    // JSON 레코드 예시 키 (한글) : "차종","차량상태","상세사양","옵션","외장색","내장색","생산번호","출고센터","생산일","판매코드_d","판매코드_e","판매코드_f","판매코드_g","판매가","조건_계"
 
-const $ = sel => document.querySelector(sel);
-const form = $('#filterForm');
-const countEl = $('#count');
-const table = $('#resultTable');
-const tbody = table.querySelector('tbody');
-const extSelect = $('#외장색');
-const extPills = $('#extColorPills');
-const summaryEl = $('#summary');
-const noResults = $('#noResults');
-const loadingEl = $('#loading');
-const yearEl = $('#year');
-yearEl.textContent = new Date().getFullYear();
+    const state = { raw: [], filtered: [] };
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-async function loadData() {
-  try {
-    const res = await fetch(DATA_URL);
-    if(!res.ok) throw new Error('데이터 로드 실패');
-    rawData = await res.json();
-    normalizeKeys(rawData);
-    buildFilterOptions(rawData);
-    applyFilter(); // initial
-  } catch(e) {
-    loadingEl.textContent = '데이터를 불러오지 못했습니다: ' + e.message;
-  } finally {
-    loadingEl.style.display = 'none';
-  }
-}
+    const filterIds = ['차종','상세사양','외장색','내장색','출고센터','옵션','판매가격_max'];
 
-function normalizeKeys(data) {
-  data.forEach(r => {
-    // 트림 없고 상세사양 있으면 맵핑
-    if(!r['트림'] && r['상세사양']) r['트림'] = r['상세사양'];
-    // 조건_계 변형
-    if(!r['조건_계'] && r['조건 계']) r['조건_계'] = r['조건 계'];
-    if(!r['조건 계'] && r['조건_계']) r['조건 계'] = r['조건_계'];
-    // 판매가 숫자화
-    if(r['판매가'] && typeof r['판매가'] === 'string') {
-      const num = r['판매가'].replace(/[^0-9.-]/g,'');
-      r['판매가'] = num ? Number(num) : r['판매가'];
+    async function load(){
+      try {
+        const res = await fetch(DATA_URL+'?v=' + Date.now());
+        if(!res.ok) throw new Error('데이터 로드 실패');
+        const json = await res.json();
+        state.raw = Array.isArray(json)? json : json.data || [];
+        buildFilterOptions();
+        $('#loading').hidden = true;
+        applyFilters();
+      } catch(err){
+        $('#loading').textContent = '데이터 로드 오류: '+ err.message;
+      }
     }
-  });
-}
 
-function getUniqueValues(key) {
-  const set = new Set(rawData.map(r => r[key]).filter(v => v !== undefined && v !== null && v !== ''));
-  return [...set].sort((a,b)=> (''+a).localeCompare(''+b,'ko'));
-}
+    function uniqueValues(key){
+      const set = new Set();
+      state.raw.forEach(row=>{ let v=row[key]; if(v!==undefined && v!==null && String(v).trim()!=='') set.add(String(v).trim()); });
+      return Array.from(set).sort((a,b)=> a.localeCompare(b,'ko')); }
 
-function buildFilterOptions(data) {
-  const map = {
-    '차종':'#차종',
-    '트림':'#트림',
-    '옵션':'#옵션',
-    '외장색':'#외장색',
-    '내장색':'#내장색',
-    '출고센터':'#출고센터'
-  };
-  Object.entries(map).forEach(([key, selector]) => {
-    const el = document.querySelector(selector);
-    if(!el) return;
-    const values = getUniqueValues(key);
-    // For multi select (외장색) don't add '전체'
-    if(el !== extSelect) {
-      el.innerHTML = '<option value=\"\">전체</option>' + values.map(v=>`<option value=\"${escapeHtml(v)}\">${escapeHtml(v)}</option>`).join('');
-    } else {
-      el.innerHTML = values.map(v=>`<option value=\"${escapeHtml(v)}\">${escapeHtml(v)}</option>`).join('');
+    function buildSelectOptions(selectId, values, allowAll=true){
+      const el = $('#'+selectId); if(!el) return;
+      if(!el.multiple){ el.innerHTML = (allowAll?'<option value="">(전체)</option>':'') + values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''); }
+      else { el.innerHTML = values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''); }
     }
-  });
-}
 
-function escapeHtml(str){
-  return (''+str).replace(/[&<>'\"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\\'+'\'':'&#39;'}[s]));
-}
+    function buildFilterOptions(){
+      buildSelectOptions('차종', uniqueValues('차종'));
+      buildSelectOptions('상세사양', uniqueValues('상세사양'));
+      buildSelectOptions('외장색', uniqueValues('외장색'), false); // multi
+      buildSelectOptions('내장색', uniqueValues('내장색'));
+      buildSelectOptions('출고센터', uniqueValues('출고센터'));
+      buildSelectOptions('옵션', uniqueValues('옵션'));
+      // 판매가 max placeholder 자동 설정 (최대값)
+      const maxPrice = Math.max(...state.raw.map(r=> toNumber(r['판매가']) ).filter(n=> !isNaN(n)) );
+      if(isFinite(maxPrice)) $('#판매가격_max').placeholder = '최대 '+ numberFormat(maxPrice);
+    }
 
-function applyFilter(evt){
-  if(evt) evt.preventDefault();
-  const formData = new FormData(form);
-  const criteria = {
-    '차종': formData.get('차종') || '',
-    '트림': formData.get('트림') || '',
-    '옵션': formData.get('옵션') || '',
-    '내장색': formData.get('내장색') || '',
-    '출고센터': formData.get('출고센터') || '',
-    maxPrice: $('#maxPrice').value ? Number($('#maxPrice').value) : null,
-    '외장색': [...extSelect.selectedOptions].map(o=>o.value)
-  };
+    function getSelectedMulti(select){
+      return Array.from(select.selectedOptions).map(o=>o.value).filter(v=>v!=='');
+    }
 
-  filtered = rawData.filter(r => {
-    if(criteria['차종'] && r['차종'] !== criteria['차종']) return false;
-    if(criteria['트림'] && r['트림'] !== criteria['트림']) return false;
-    if(criteria['옵션'] && r['옵션'] !== criteria['옵션']) return false;
-    if(criteria['내장색'] && r['내장색'] !== criteria['내장색']) return false;
-    if(criteria['출고센터'] && r['출고센터'] !== criteria['출고센터']) return false;
-    if(criteria['외장색'].length > 0 && !criteria['외장색'].includes(r['외장색'])) return false;
-    if(criteria.maxPrice !== null && typeof r['판매가'] === 'number' && r['판매가'] > criteria.maxPrice) return false;
-    return true;
-  });
+    function applyFilters(){
+      const f = {
+        '차종': $('#차종').value.trim(),
+        '상세사양': $('#상세사양').value.trim(),
+        '외장색': getSelectedMulti($('#외장색')),
+        '내장색': $('#내장색').value.trim(),
+        '출고센터': $('#출고센터').value.trim(),
+        '옵션': $('#옵션').value.trim(),
+        '판매가격_max': $('#판매가격_max').value.trim()
+      };
+      const maxPrice = f['판매가격_max']? Number(f['판매가격_max']) : Infinity;
 
-  renderCount();
-  renderTable();
-  renderSummary(criteria);
-  buildPills(criteria['외장색']);
-}
+      state.filtered = state.raw.filter(row => {
+        if(f['차종'] && String(row['차종']).trim() !== f['차종']) return false;
+        if(f['상세사양'] && String(row['상세사양']).trim() !== f['상세사양']) return false;
+        if(f['외장색'].length && !f['외장색'].includes(String(row['외장색']).trim())) return false;
+        if(f['내장색'] && String(row['내장색']).trim() !== f['내장색']) return false;
+        if(f['출고센터'] && String(row['출고센터']).trim() !== f['출고센터']) return false;
+        if(f['옵션'] && String(row['옵션']).trim() !== f['옵션']) return false;
+        const price = toNumber(row['판매가']);
+        if(price && price > maxPrice) return false;
+        return true;
+      });
+      render();
+    }
 
-function renderSummary(criteria){
-  const parts = [];
-  if(criteria['차종']) parts.push('차종=' + criteria['차종']);
-  if(criteria['트림']) parts.push('트림=' + criteria['트림']);
-  if(criteria['옵션']) parts.push('옵션=' + criteria['옵션']);
-  if(criteria['외장색'].length) parts.push('외장색=' + criteria['외장색'].join(','));
-  if(criteria['내장색']) parts.push('내장색=' + criteria['내장색']);
-  if(criteria['출고센터']) parts.push('출고센터=' + criteria['출고센터']);
-  if(criteria.maxPrice !== null) parts.push('≤ ' + criteria.maxPrice.toLocaleString() + '원');
-  summaryEl.textContent = parts.length ? '필터: ' + parts.join(' | ') : '';
-}
+    function toNumber(v){ if(v==null) return NaN; return Number(String(v).replace(/[^0-9.-]/g,'')); }
+    function numberFormat(n){ return n.toLocaleString('ko-KR'); }
 
-function renderCount(){
-  countEl.textContent = `검색 결과는 총 ${filtered.length}대입니다.`;
-}
+    function escapeHtml(str){ return String(str).replace(/[&<>"]g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[s]); }
 
-function renderTable(){
-  if(filtered.length === 0){
-    table.style.display = 'none';
-    noResults.style.display = 'block';
-    return;
-  }
-  noResults.style.display = 'none';
-  table.style.display = '';
-  tbody.innerHTML = filtered.map((r,i)=>{
-    const codes = Object.keys(r)
-      .filter(k=>k.startsWith('판매코드'))
-      .map(k=>r[k])
-      .filter(v=>v && v !== '')
-      .join('/');
-    return `<tr>
-      <td>${i+1}</td>
-      <td>${escapeHtml(r['차종']||'')}</td>
-      <td>${escapeHtml(r['차량상태']||'')}</td>
-      <td>${escapeHtml(r['트림']||'')}</td>
-      <td>${escapeHtml(r['옵션']||'')}</td>
-      <td>${escapeHtml(r['외장색']||'')}</td>
-      <td>${escapeHtml(r['내장색']||'')}</td>
-      <td>${escapeHtml(r['생산번호']||'')}</td>
-      <td>${escapeHtml(r['출고센터']||'')}</td>
-      <td>${escapeHtml(r['생산일']||'')}</td>
-      <td>${escapeHtml(codes)}</td>
-      <td>${ formatPrice(r['판매가']) }</td>
-      <td>${escapeHtml(r['조건_계']||r['조건 계']||'')}</td>
-    </tr>`;
-  }).join('');
-}
+    function combineCodes(row){
+      const keys = Object.keys(row).filter(k=> /^판매코드/i.test(k));
+      if(!keys.length){
+        // d,e,f,g 열이 따로 있을 가능성: "판매코드_d" 형식 없으면 d,e,f,g 직접 결합
+        const raw = ['d','e','f','g'].map(c=> row['판매코드_'+c] || row[c]).filter(Boolean);
+        if(raw.length) return raw.join('/');
+        return '';
+      }
+      return keys.sort().map(k=> row[k]).filter(Boolean).join('/');
+    }
 
-function formatPrice(v){
-  if(typeof v === 'number') return v.toLocaleString() + '원';
-  if(typeof v === 'string'){
-    const num = v.replace(/[^0-9.-]/g,'');
-    if(num) return Number(num).toLocaleString() + '원';
-    return v;
-  }
-  return '';
-}
+    function render(){
+      const tbody = $('#resultTable tbody');
+      tbody.innerHTML = '';
+      const count = state.filtered.length;
+      const countEl = $('#resultCount');
+      countEl.hidden = false;
+      countEl.textContent = `검색 결과는 총 ${count.toLocaleString('ko-KR')}대입니다.`;
+      $('#noData').hidden = count !== 0;
+      if(!count) return;
 
-function buildPills(values){
-  extPills.innerHTML = values.map(val=>`<span class=\"pill\">${escapeHtml(val)}<button type=\"button\" data-val=\"${escapeHtml(val)}\" aria-label=\"삭제\">×</button></span>`).join('');
-}
+      const frag = document.createDocumentFragment();
+      state.filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = [
+          row['차종'],
+          row['차량상태'],
+          row['상세사양'],
+          row['옵션'],
+          row['외장색'],
+          row['내장색'],
+          row['생산번호'],
+          row['출고센터'],
+          row['생산일'],
+          combineCodes(row),
+          row['판매가']? numberFormat(toNumber(row['판매가'])) : '',
+          row['조건_계'] || row['조건 계'] || row['조건계'] || ''
+        ].map(v=> `<td>${v==null?'' : escapeHtml(v)}</td>`).join('');
+        frag.appendChild(tr);
+      });
+      tbody.appendChild(frag);
+    }
 
-extPills.addEventListener('click', e=>{
-  if(e.target.tagName === 'BUTTON'){
-    const val = e.target.getAttribute('data-val');
-    [...extSelect.options].forEach(o=>{
-      if(o.value === val) o.selected = false;
+    // 이벤트 바인딩
+    filterIds.forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('change', applyFilters);
+      if(el.tagName==='INPUT') el.addEventListener('input', debounce(applyFilters, 300));
     });
-    applyFilter();
+
+    $('#resetBtn').addEventListener('click', ()=>{
+      $('#filterForm').reset();
+      // 멀티선택 초기화
+      Array.from($('#외장색').options).forEach(o=> o.selected=false);
+      applyFilters();
+    });
+
+    function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args), wait); } }
+
+    load();
+  // ===== PATCH: Key normalization 확장 (2025-07-19) =====
+(function(){
+  const prevNormalize = typeof normalizeKeys === 'function' ? normalizeKeys : null;
+  window.normalizeKeys = function(data){
+    if(prevNormalize) prevNormalize(data); // 기존 로직 수행
+    data.forEach(r=>{
+      // 트림 보정
+      if(!r['트림'] && r['상세사양']) r['트림'] = r['상세사양'];
+      // 외장/내장 칼라 표기 변형
+      if(!r['외장색'] && r['외장칼라']) r['외장색'] = r['외장칼라'];
+      if(!r['내장색'] && r['내장칼라']) r['내장색'] = r['내장칼라'];
+      // 조건_계 변형
+      if(!r['조건_계'] && r['조건 계']) r['조건_계'] = r['조건 계'];
+      if(!r['조건 계'] && r['조건_계']) r['조건 계'] = r['조건_계'];
+      // 판매가 다른 표기 통합
+      if(!r['판매가']) {
+        if(r['판매가격']) r['판매가'] = r['판매가격'];
+        else if(r['판매 가격']) r['판매가'] = r['판매 가격'];
+      }
+      // 판매가 숫자화
+      if(r['판매가'] && typeof r['판매가'] === 'string'){
+        const num = r['판매가'].replace(/[^0-9.-]/g,'');
+        r['판매가'] = num ? Number(num) : r['판매가'];
+      }
+    });
+  };
+  // 이미 로드된 데이터가 있다면 재정규화 후 필터 재적용
+  if(Array.isArray(window.rawData) && window.rawData.length){
+    normalizeKeys(window.rawData);
+    if(typeof buildFilterOptions==='function') buildFilterOptions(window.rawData);
+    if(typeof applyFilter==='function') applyFilter();
   }
-});
-
-form.addEventListener('submit', applyFilter);
-$('#resetBtn').addEventListener('click', ()=>{
-  form.reset();
-  // Clear multi-select
-  [...extSelect.options].forEach(o=>o.selected=false);
-  $('#maxPrice').value = '';
-  applyFilter();
-});
-
-extSelect.addEventListener('change', ()=> buildPills([...extSelect.selectedOptions].map(o=>o.value)));
-
-loadData();
+})();
+// ===== PATCH END =====
 </script>
 </body>
 </html>
+
